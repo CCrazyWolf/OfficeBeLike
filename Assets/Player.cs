@@ -1,13 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IBeingSick
 {
     public float moveSpeed = 5f;
+    public Text deseaseLabel;
 
     Vector2 movement;
     Vector2 mousePos;
+    bool isSick = false;
+    public float deseaseLevel = 0f;
     bool isInteracting = false;
     GameObject interactable = null;
     Animator anim;
@@ -25,8 +29,6 @@ public class Player : MonoBehaviour
     {
         movement.x = Input.GetAxis("Horizontal");
         movement.y = Input.GetAxis("Vertical");
-
-        
 
         mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
     }
@@ -46,12 +48,11 @@ public class Player : MonoBehaviour
         }
 
         Vector2 lookDir = mousePos - rb.position;
-        //float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
-        //rb.rotation = angle;
 
 
         RaycastHit2D hit;
         hit = Physics2D.Raycast(rb.position, lookDir, 3f, LayerMask.GetMask("interactables"));
+        Debug.DrawLine(transform.position, hit.point, Color.green);
         if (hit.collider != null)
         {
             var interactable = hit.collider.GetComponent<IInteractable>();
@@ -61,6 +62,35 @@ public class Player : MonoBehaviour
                 interactable.Interact(this.gameObject);
             }
         }
+    }
 
+    public void gettingSick ()
+    {
+        isSick = true;
+        StartCoroutine(beingSick());
+    }
+
+    public void Cured()
+    {
+        isSick = false;
+        deseaseLevel = 0f;
+    }
+
+    public void Quarantine()
+    {
+        Debug.Log("You are sick. You are not able to play!");
+    }
+
+    IEnumerator beingSick()
+    {
+        while (deseaseLevel <= 98f)
+        {
+            deseaseLevel += 2f;
+            deseaseLabel.text = deseaseLevel.ToString() + "%";
+            yield return new WaitForSeconds(2);
+        }
+        if (isSick)
+            Quarantine();
     }
 }
+
