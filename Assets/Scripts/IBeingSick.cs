@@ -7,4 +7,5 @@ public interface IBeingSick
     void gettingSick();
     void Cured();
     void Quarantine();
+    void spawnVirus();
 }

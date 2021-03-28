@@ -12,6 +12,7 @@ public class Player : MonoBehaviour, IBeingSick
     Vector2 mousePos;
     bool isSick = false;
     public float deseaseLevel = 0f;
+    float timerForNewVirus = 0f;
     bool isInteracting = false;
     GameObject interactable = null;
     Animator anim;
@@ -64,16 +65,26 @@ public class Player : MonoBehaviour, IBeingSick
         }
     }
 
-    public void gettingSick ()
+    public void gettingSick()
     {
-        isSick = true;
-        StartCoroutine(beingSick());
+        if (!isSick)
+        {
+            isSick = true;
+            StartCoroutine("beingSick");
+        }
     }
 
     public void Cured()
     {
         isSick = false;
+        StopCoroutine("beingSick");
         deseaseLevel = 0f;
+        deseaseLabel.text = deseaseLevel.ToString() + "%";
+    }
+
+    public void spawnVirus()
+    {
+        GameManager.instance.SpawnVirus(transform.position);
     }
 
     public void Quarantine()
@@ -83,10 +94,12 @@ public class Player : MonoBehaviour, IBeingSick
 
     IEnumerator beingSick()
     {
-        while (deseaseLevel <= 98f)
+        while (deseaseLevel <= 95)
         {
-            deseaseLevel += 2f;
+            deseaseLevel += 5f;
             deseaseLabel.text = deseaseLevel.ToString() + "%";
+            if (Random.value < 0.5)
+                spawnVirus();
             yield return new WaitForSeconds(2);
         }
         if (isSick)
